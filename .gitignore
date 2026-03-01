@@ -1,0 +1,37 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.dist-info/
+.eggs/
+
+# Bytecode caches
+**/__pycache__/
+
+# Build and packaging
+build/
+dist/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test artifacts and local outputs
+*.enc
+*.dec
+sample.txt
+sample.enc
+sample.dec.txt
+
+test.txt
+test.enc
+test.dec.txt
+
+# Logs
+*.log
