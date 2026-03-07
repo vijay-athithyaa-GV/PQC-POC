@@ -2,11 +2,13 @@
 
 Proof of concept for a crypto-agile hybrid cryptographic architecture resistant to quantum attacks.
 
-## What is implemented (Day 1-3)
+## What is implemented (Day 1-7)
 
 - AES-256-GCM byte encryption/decryption
 - AES-256-GCM file encryption/decryption
-- ML-KEM (Kyber) key encapsulation using liboqs-python (standalone)
+- ML-KEM (Kyber) key encapsulation using liboqs-python
+- Encrypted file packaging format (binary container)
+- Full hybrid encryption pipeline (Kyber + AES-GCM)
 
 ## Requirements
 
@@ -30,6 +32,25 @@ source .venv/bin/activate
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
+
+3) Install liboqs with shared libraries (required by liboqs-python):
+
+```bash
+cd ~
+git clone https://github.com/open-quantum-safe/liboqs.git
+cd liboqs
+mkdir build && cd build
+cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+make -j$(nproc)
+make install
+```
+
+4) Ensure the loader can find liboqs:
+
+```bash
+export OQS_INSTALL_DIR=$HOME/.local
+export LD_LIBRARY_PATH=$HOME/.local/lib:$LD_LIBRARY_PATH
+```
 ```
 
 ## AES file demo
@@ -70,8 +91,8 @@ quantumshield/
 ├── core/
 │   ├── aes_module.py
 │   ├── kyber_module.py
-│   ├── hybrid_engine.py
-│   └── crypto_agility.py
+│   ├── package_format.py
+│   └── hybrid_engine.py
 ├── cli/
 │   └── main.py
 ├── tests/
@@ -80,120 +101,70 @@ quantumshield/
 
 ## Notes
 
-- Hybrid integration (Kyber + AES) is not implemented yet.
 - This is a proof of concept intended for learning and experimentation.
+- Hybrid encryption requires a working liboqs shared library.
 
-## Day 4 – Hybrid Integration (Key Wrapping Layer)
+## Day 6 – Encrypted File Packaging Format
 
-- Integrated ML-KEM (Kyber) with AES-256-GCM
+Binary container format:
 
-- Implemented secure AES key wrapping using ML-KEM shared secret
+```
+[ MAGIC HEADER (7 bytes) : b"QSHIELD" ]
+[ VERSION (1 byte) ]
+[ KYBER_CIPHERTEXT_LENGTH (4 bytes big endian) ]
+[ KYBER_CIPHERTEXT (variable length) ]
+[ AES_NONCE (12 bytes) ]
+[ AES_TAG (16 bytes) ]
+[ AES_CIPHERTEXT (remaining bytes) ]
+```
 
-- Base64-safe metadata packaging for binary components
+## Day 7 – Full Hybrid Encryption Pipeline
 
-- Proper nonce and authentication tag storage for AES-GCM
-
-- Crypto-agile structure allowing KEM algorithm selection
-
-## Architecture introduced:
-
-    File → AES-256-GCM encryption
-    AES key → Wrapped using ML-KEM shared secret
-    ML-KEM ciphertext + wrapped key → Stored in metadata.json
-## Day 5 – Full Hybrid Encryption Engine
-
-- Implemented HybridEngine class
-
-- End-to-end file encryption & decryption
-
-- ML-KEM-768 protecting AES file encryption key
-
-- Clean separation between:
-
-    File encryption layer (AES)
-
-    Key encapsulation layer (ML-KEM)
-
-- Verified integrity using AES-GCM authentication
-
-# Result:
-- Fully functional post-quantum hybrid file encryption system.
+- Kyber encapsulates a shared secret
+- AES-256-GCM key is derived from the shared secret
+- Encrypted data is packaged using the binary container
 
 ## Hybrid Encryption Demo
 
-    Prepare an input file:
+Prepare an input file:
 
-    echo "Quantum Test File" > test.txt
+```bash
+echo "Quantum Test File" > test.txt
+```
 
-    Run hybrid encryption:
+Run hybrid encryption:
 
-    python - <<'PY'
-    from quantumshield.core.hybrid_engine import HybridEngine
+```bash
+python - <<'PY'
+from quantumshield.core.hybrid_engine import decrypt_file, encrypt_file
+from quantumshield.core.kyber_module import generate_keypair
 
-    engine = HybridEngine()
+public_key, secret_key = generate_keypair()
+encrypt_file("test.txt", "encrypted.qs", public_key)
+decrypt_file("encrypted.qs", "decrypted.txt", secret_key)
+PY
+```
 
-    engine.encrypt("test.txt", "encrypted.bin", "metadata.json")
-    engine.decrypt("encrypted.bin", "metadata.json", "decrypted.txt")
-    PY
+Verify result:
 
-    Expected output:
+```bash
+cat decrypted.txt
+```
 
-    Hybrid encryption complete.
-    Hybrid decryption complete.
+## Testing
 
-    Verify result:
+Disable external pytest plugins (recommended on ROS-based systems):
 
-    cat decrypted.txt
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+```
 
-    Output:
+Run only the hybrid pipeline tests:
 
-    Quantum Test File
-## Hybrid Architecture Overview
-QuantumShield now implements a hybrid post-quantum encryption model:
-
-AES-256-GCM encrypts file contents
-
-ML-KEM encapsulates a shared secret
-
-Shared secret derives a wrapping key
-
-AES file key is encrypted using wrapping key
-
-Metadata stores:
-
-ML-KEM ciphertext
-
-Wrapped AES key
-
-GCM nonce and authentication tag
-
-This follows modern hybrid cryptographic design principles.
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q quantumshield/tests/test_pipeline.py
+```
 
 ## Security Notes
 
-This is a Proof-of-Concept implementation.
-
-Secret keys are stored in metadata for testing purposes.
-
-In a production system:
-
-Receiver generates ML-KEM keypair.
-
-Sender uses receiver's public key.
-
-Secret keys must never be transmitted or stored alongside ciphertext.
-
-Not audited for production security.
-
-## Updated Project Layout
-    quantumshield/
-    ├── core/
-    │   ├── aes_module.py
-    │   ├── kyber_module.py
-    │   ├── hybrid_engine.py
-    │   └── crypto_agility.py
-    ├── cli/
-    │   └── main.py
-    ├── tests/
-    ├── benchmarks/
-    └── README.md
+This is a proof-of-concept implementation and is not audited.

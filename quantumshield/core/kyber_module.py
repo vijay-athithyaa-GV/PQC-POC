@@ -5,7 +5,14 @@ Compatible with older liboqs-python builds.
 
 from __future__ import annotations
 from typing import Tuple
-import oqs
+
+_oqs_import_error: BaseException | None
+try:
+    import oqs  # type: ignore
+    _oqs_import_error = None
+except BaseException as exc:  # pragma: no cover - depends on local environment
+    oqs = None  # type: ignore
+    _oqs_import_error = exc
 
 DEFAULT_KEM_ALGORITHM = "ML-KEM-768"
 
@@ -15,9 +22,23 @@ def _validate_bytes(value: bytes, name: str) -> None:
         raise TypeError(f"{name} must be bytes")
 
 
+def is_oqs_available() -> bool:
+    return _oqs_import_error is None
+
+
+def _require_oqs() -> None:
+    if _oqs_import_error is None:
+        return
+    raise RuntimeError(
+        "liboqs is not available. Install liboqs or set OQS_INSTALL_DIR."
+    ) from _oqs_import_error
+
+
 def generate_keypair(
     algorithm: str = DEFAULT_KEM_ALGORITHM,
 ) -> Tuple[bytes, bytes]:
+
+    _require_oqs()
 
     with oqs.KeyEncapsulation(algorithm) as kem:
         public_key = kem.generate_keypair()
@@ -30,6 +51,8 @@ def encapsulate(
     public_key: bytes,
     algorithm: str = DEFAULT_KEM_ALGORITHM,
 ) -> Tuple[bytes, bytes]:
+
+    _require_oqs()
 
     _validate_bytes(public_key, "public_key")
 
@@ -44,6 +67,8 @@ def decapsulate(
     secret_key: bytes,
     algorithm: str = DEFAULT_KEM_ALGORITHM,
 ) -> bytes:
+
+    _require_oqs()
 
     _validate_bytes(ciphertext, "ciphertext")
     _validate_bytes(secret_key, "secret_key")

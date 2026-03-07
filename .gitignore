@@ -25,6 +25,10 @@ Thumbs.db
 # Test artifacts and local outputs
 *.enc
 *.dec
+*.qs
+encrypted.bin
+decrypted.txt
+metadata.json
 sample.txt
 sample.enc
 sample.dec.txt
@@ -33,5 +37,9 @@ test.txt
 test.enc
 test.dec.txt
 
+# liboqs local build artifacts
+_oqs/
+
 # Logs
 *.log
+*.QuantumShield_Implementation_Guide (1).docx
