@@ -1,0 +1,5 @@
+Added a crypto-agility layer, 
+updated the CLI to support keygen/encrypt/decrypt with 
+safer key handling, and layered in validation/error handling on the hybrid pipeline 
+while keeping the underlying crypto logic intact. Also added benchmarking scripts and 
+documentation for HNDL simulation and the final report with demo steps.

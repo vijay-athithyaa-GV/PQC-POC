@@ -26,6 +26,7 @@ Thumbs.db
 *.enc
 *.dec
 *.qs
+*.key
 encrypted.bin
 decrypted.txt
 metadata.json
