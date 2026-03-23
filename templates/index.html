@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumShield - Crypto Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeIn 0.6s ease;
+        }
+
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            max-height: 300px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .data-box {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            animation: slideIn 0.4s ease;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+
+        .flow-diagram {
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .flow-step {
+            display: inline-block;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .flow-arrow {
+            display: inline-block;
+            margin: 0 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+
+        .copy-btn {
+            padding: 4px 8px;
+            font-size: 0.8em;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            button {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 QuantumShield Crypto Simulation</h1>
+            <p>Real-time Hybrid Encryption (Kyber + AES-256-GCM)</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- Left Panel: Key Generation -->
+            <div class="panel">
+                <h2>🔑 Key Management</h2>
+
+                <div id="keyStatus" class="info-box">
+                    Status: <strong id="keyStatusText">No keys generated</strong>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="generateKeys()">Generate Keys</button>
+                </div>
+
+                <div id="keyMessage"></div>
+
+                <div id="keyInfo" style="display: none;">
+                    <div class="form-group">
+                        <label>Public Key (Base64):</label>
+                        <div class="data-box" id="publicKeyDisplay"></div>
+                        <button class="copy-btn" onclick="copyToClipboard('publicKeyDisplay')">Copy</button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Public Key Size</div>
+                            <div class="stat-value" id="pubKeySize">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Secret Key Size</div>
+                            <div class="stat-value" id="secKeySize">-</div>
+                        </div>
+                    </div>
+
+                    <div class="flow-diagram">
+                        <strong>Kyber ML-KEM (ML-KEM-768)</strong><br>
+                        <small>Post-quantum key encapsulation mechanism</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Encryption -->
+            <div class="panel">
+                <h2>🔒 Encryption</h2>
+
+                <div id="encryptMessage"></div>
+
+                <div class="form-group">
+                    <label for="plaintextInput">Plaintext Message:</label>
+                    <textarea id="plaintextInput" placeholder="Enter text to encrypt...">Hello, QuantumShield!
+This is a secure message using post-quantum cryptography.</textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="encryptText()">Encrypt</button>
+                </div>
+
+                <div id="encryptInfo" style="display: none;">
+                    <div class="form-group">
+                        <label>Ciphertext (Base64):</label>
+                        <div class="data-box" id="ciphertextDisplay"></div>
+                        <button class="copy-btn" onclick="copyToClipboard('ciphertextDisplay')">Copy</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>KEM Ciphertext (Base64):</label>
+                        <div class="data-box" id="kemCiphertextDisplay"></div>
+                        <button class="copy-btn" onclick="copyToClipboard('kemCiphertextDisplay')">Copy</button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Plaintext Size</div>
+                            <div class="stat-value" id="plainSizeStats">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Ciphertext Size</div>
+                            <div class="stat-value" id="cipherSizeStats">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">KEM Ciphertext</div>
+                            <div class="stat-value" id="kemSizeStats">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Shared Secret</div>
+                            <div class="stat-value" id="secretSizeStats">-</div>
+                        </div>
+                    </div>
+
+                    <div class="flow-diagram">
+                        <div class="flow-step">Plaintext</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Kyber Encapsulation</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Shared Secret</div><br><br>
+                        <div class="flow-step">Plaintext + Key</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">AES-256-GCM</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Ciphertext</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Decryption Panel -->
+        <div class="panel">
+            <h2>🔓 Decryption</h2>
+
+            <div id="decryptMessage"></div>
+
+            <div class="btn-group">
+                <button class="btn-success" onclick="decryptText()">Decrypt Last Ciphertext</button>
+            </div>
+
+            <div id="decryptInfo" style="display: none;">
+                <div class="form-group">
+                    <label>Decrypted Message:</label>
+                    <textarea id="decryptedOutput" readonly></textarea>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Decrypted Size</div>
+                        <div class="stat-value" id="decryptSizeStats">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Verification</div>
+                        <div class="stat-value" id="verificationStatus">-</div>
+                    </div>
+                </div>
+
+                <div class="flow-diagram">
+                    <div class="flow-step">Ciphertext + KEM CT</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Kyber Decapsulation</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Shared Secret</div><br><br>
+                    <div class="flow-step">Ciphertext + Key</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">AES-256-GCM Decrypt</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Plaintext</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Post-Quantum Cryptography Proof of Concept - Secure. Quantum-Resistant. Available.</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+
+        async function generateKeys() {
+            try {
+                showMessage('keyMessage', 'Generating Kyber keypair... Please wait.', 'info');
+                const response = await fetch(`${API_BASE}/generate-keys`, {
+                    method: 'POST',
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('publicKeyDisplay').textContent = data.public_key;
+                    document.getElementById('pubKeySize').textContent = data.public_key_size + ' bytes';
+                    document.getElementById('secKeySize').textContent = data.secret_key_size + ' bytes';
+                    document.getElementById('keyInfo').style.display = 'block';
+                    document.getElementById('keyStatusText').textContent = '✅ Keys ready';
+
+                    showMessage('keyMessage', 'Keys generated successfully!', 'success');
+                } else {
+                    showMessage('keyMessage', 'Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('keyMessage', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function encryptText() {
+            try {
+                const plaintext = document.getElementById('plaintextInput').value;
+                if (!plaintext) {
+                    showMessage('encryptMessage', 'Please enter text to encrypt', 'error');
+                    return;
+                }
+
+                showMessage('encryptMessage', 'Encrypting... Please wait.', 'info');
+
+                const response = await fetch(`${API_BASE}/encrypt`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ plaintext }),
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('ciphertextDisplay').textContent = data.ciphertext;
+                    document.getElementById('kemCiphertextDisplay').textContent = data.kem_ciphertext;
+                    document.getElementById('plainSizeStats').textContent = data.plaintext_size + ' bytes';
+                    document.getElementById('cipherSizeStats').textContent = data.ciphertext_size + ' bytes';
+                    document.getElementById('kemSizeStats').textContent = data.kem_ciphertext_size + ' bytes';
+                    document.getElementById('secretSizeStats').textContent = data.shared_secret_size + ' bytes';
+                    document.getElementById('encryptInfo').style.display = 'block';
+
+                    showMessage('encryptMessage', 'Encryption successful! 🔐', 'success');
+
+                    // Store for later decryption
+                    window.lastEncryption = {
+                        kem_ciphertext: data.kem_ciphertext,
+                        ciphertext: data.ciphertext,
+                        nonce: data.nonce,
+                        tag: data.tag,
+                    };
+                } else {
+                    showMessage('encryptMessage', 'Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('encryptMessage', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function decryptText() {
+            try {
+                if (!window.lastEncryption) {
+                    showMessage('decryptMessage', 'Please encrypt a message first', 'error');
+                    return;
+                }
+
+                showMessage('decryptMessage', 'Decrypting... Please wait.', 'info');
+
+                const response = await fetch(`${API_BASE}/decrypt`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(window.lastEncryption),
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('decryptedOutput').value = data.plaintext;
+                    document.getElementById('decryptSizeStats').textContent = data.plaintext_size + ' bytes';
+
+                    const originalPlaintext = document.getElementById('plaintextInput').value;
+                    const matches = data.plaintext === originalPlaintext;
+                    document.getElementById('verificationStatus').textContent = matches ? '✅ MATCH' : '❌ MISMATCH';
+
+                    document.getElementById('decryptInfo').style.display = 'block';
+                    showMessage('decryptMessage', 'Decryption successful! 🔓', 'success');
+                } else {
+                    showMessage('decryptMessage', 'Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('decryptMessage', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        // Show initial message
+        window.addEventListener('load', () => {
+            showMessage('keyMessage', '👈 Click "Generate Keys" to start', 'info');
+        });
+    </script>
+</body>
+</html>

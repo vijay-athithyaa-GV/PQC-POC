@@ -1,2 +1,4 @@
 pycryptodome
 liboqs-python
+flask
+flask-cors
